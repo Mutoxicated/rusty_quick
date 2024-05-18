@@ -3,7 +3,7 @@ mod macros;
 qmod!(pub test, test2);
 
 qfn!(pub wow, i32, p1/Vec<i32>, p2/bool, {
-    if qop!(&&, p1[0] == p1[1], p2) {
+    if qcmp!(&&, p1[0] == p1[1], p2) {
         return 1;
     }else {
         return -1;

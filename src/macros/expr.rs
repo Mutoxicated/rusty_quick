@@ -16,7 +16,7 @@
 /// }
 /// ```
 #[macro_export]
-macro_rules! qop {
+macro_rules! qcmp {
     ($op:tt, $last:expr, $( $expr:tt ),+) => {
         {
             $( $expr $op )* $last
