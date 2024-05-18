@@ -58,14 +58,19 @@ macro_rules! qmatch {
 /// ```
 #[macro_export]
 macro_rules! qfor {
-    ( $index:ident / $length:expr, $block:block ) => {
+    ( $index:ident; $length:expr; $($token:tt)* ) => {
         {
-            for $index in 0..$length $block
+            for $index in 0..$length {$($token)*}
         }
     };
-    ( $item:ident,  $arr:expr, $block:block ) => {
+    ( $index:ident; $start:expr, $length:expr; $($token:tt)* ) => {
         {
-            for $item in &mut $arr $block
+            for $index in $start..$length {$($token)*}
+        }
+    };
+    ( $item:ident: $arr:expr; $($token:tt)* ) => {
+        {
+            for $item in &mut $arr {$($token)*}
         }
     };
 }
@@ -93,59 +98,58 @@ macro_rules! qfor {
 /// ```
 #[macro_export]
 macro_rules! qfn {
-    ($fn_name:ident, $ret:ty, $( $name:ident/$type:ty ),*, $block:block) => {
-        pub fn $fn_name($($name:$type),*) -> $ret $block
-    }
-}
-/// Generates a series of comparison expressions
-/// ## Params
-/// 1. *$op:tt* is the operator symbol
-/// 
-/// 2. *$expr:expr...* are the expressions to be compared with givne the *$op*
-/// 
-/// # Example: 
-/// ```
-/// let a = 1
-/// let b = 98
-/// 
-/// if qop!(||, b, a) {
-///     //do something
-/// } else {
-///     //do something else
-/// }
-/// ```
-#[macro_export]
-macro_rules! qop {
-    ($op:tt, $last:expr, $( $expr:expr ),+) => {
-        {
-            $( $expr $op )* $last
-        }
+    ($public:vis$ fn_name:ident, $ret:ty, $( $name:ident/$type:ty ),*, $block:block) => {
+        $public fn $fn_name($($name:$type),*) -> $ret $block
+    };
+    ($public:vis $fn_name:ident, $ret:ty, $block:block) => {
+        $public fn $fn_name() -> $ret $block
+    };
+    ($public:vis $fn_name:ident, $block:block) => {
+        $public fn $fn_name() $block
+    };
+    ($public:vis $fn_name:ident) => {
+        $public fn $fn_name() 
     };
 }
 #[macro_export]
 macro_rules! qimpl {
-    () => {
-        
+    ($t:ty; $($token:tt)*) => {
+        impl $t {$($token)*}
+    };
+
+    ([$tr:ty] $t:ty; $($token:tt)*) => {
+        impl $tr for $t {$($token)*}
     };
 }
 #[macro_export]
 macro_rules! qenum {
-    ( $enum:ident; $( $name:ident$( ($( $wrapped:ty ),*) )? ),* ) => {
-        pub enum $enum {
+    ( $(/$t:tt)?$enum:ident; $( $name:ident$( ($( $wrapped:ty ),*) )? ),* ) => {
+        $($t)? enum $enum {
             $( $name$( ($($wrapped),*) )? ),*
         }
     };
-    ( [$( $derive:ty ),*] $enum:ident; $( $name:ident$( ($( $wrapped:ty ),*) )? ),* ) => {
+    ( [$( $derive:ty ),*] $(/$t:tt)?$enum:ident; $( $name:ident$( ($( $wrapped:ty ),*) )? ),* ) => {
         #[derive($($derive),*)]
-        pub enum $enum {
+        $($t)? enum $enum {
             $( $name$( ($($wrapped),*) )? ),*
         }
     };
 }
-
 #[macro_export]
 macro_rules! qmod {
-    ( $( $(/$p:tt)?$t:ident ),* ) => {
-        $( $($p)? mod $t; )*
+    ( $( $p:vis $t:ident ),* ) => {
+        $( $p mod $t; )*
+    };
+}
+#[macro_export]
+macro_rules! quse {
+    ( $( $p:vis $path:path ),* ) => {
+        $( $p use $path; )*
+    };
+}
+#[macro_export]
+macro_rules! qvar {
+    ( $( $name:ident$([$a:ty])? $(:$b:expr)? ),* ) => {
+        $( let $name$(:$a)?$(=$b)?;)*
     };
 }

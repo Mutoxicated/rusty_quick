@@ -1,8 +1,8 @@
-mod macro_tests;
+mod macros;
 
-qmod!(/pub test, test2);
+qmod!(pub test, test2);
 
-qfn!(wow, i32, p1/Vec<usize>, p2/bool, {
+qfn!(pub wow, i32, p1/Vec<i32>, p2/bool, {
     if qop!(&&, p1[0] == p1[1], p2) {
         return 1;
     }else {
@@ -10,24 +10,20 @@ qfn!(wow, i32, p1/Vec<usize>, p2/bool, {
     }
 });
 
-qfn!(example_function, String, p1/bool, {
-    if p1 {
-        return String::from("true");
-    }else {
-        return String::from("false");
-    }
-});
-
-qenum!([Debug] TestEnum; Three(i32), Four, Five, Six);
-
-qenum!(TestEnum2; One);
-
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct Test {
     a:i32,
     b:bool,
-    c:TestEnum
+    c:test::A
+}
+
+trait TraitTest {
+    fn test() {}
+}
+
+qimpl!{[TraitTest] Test;
+    
 }
 
 fn main() {
@@ -36,20 +32,22 @@ fn main() {
 
     let test = qmatch!(a,1,0);
 
-    qfor!(item, list, {
+    qfor!{item: list;
         *item = 0;
-    });
-    qfor!(i / list.len(), {
+    }
+    qfor!{i; 2, list.len(); 
         list[i] = 0;
-    });
+    }
 
     wow(vec![1,2], false);
 
     let test2 = Test{
         a: 1,
         b: false,
-        c: TestEnum::Four
+        c: test::A::Test
     };
+
+    qvar!(o[Test], b:test2.a);
 
     println!("Hello, world! {test2:?}, {test}");
 }

@@ -1,6 +1,11 @@
 [package]
 name = "rusty_tests"
+description = "A library meant to make coding in rust more efficient, utilizing the incredible power of macros."
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/Mutoxicated/rusty_quick"
+license = "MIT"
+keywords = ["quality_of_life"]
+categories = ["development-tools::cargo-plugins"]
 
 [dependencies]
