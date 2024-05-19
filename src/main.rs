@@ -1,3 +1,5 @@
+use std::vec;
+
 mod macros;
 
 qmod!(pub test, test2);
@@ -10,27 +12,51 @@ qfn!(pub wow, i32, p1/Vec<i32>, p2/bool, {
     }
 });
 
-#[derive(Debug)]
-#[allow(dead_code)]
-pub struct Test {
-    a:i32,
-    b:bool,
+pub trait TraitTest {
+    fn test();
+}
+pub trait TraitTest2 {
+    fn test();
+}
+
+qstruct!([Debug] pub Test<T>;
+    pub a:T, 
+    b:bool, 
     c:test::A
+);
+
+qstruct!([Debug, Clone, Copy] Example; o:u32);
+
+qimpl! {[TraitTest] Example;
+    fn test() {
+        println!("example")
+    }
 }
 
-trait TraitTest {
-    fn test() {}
+qimpl!{[TraitTest] Test<T>;
+    fn test() {
+
+    }
 }
 
-qimpl!{[TraitTest] Test;
+pub struct Test2<T> where T: TraitTest, T: TraitTest2 {
+    a: T
+}
+
+impl<T> Test2<T> where T: TraitTest, T: TraitTest2 {
     
 }
 
 fn main() {
     let a = 0;
-    let mut list = [1,2,3,4];
+    let mut list = vec![1,2,3,4];
 
-    let test = qmatch!(a,1,0);
+    let test = qmatch!(a; 1,0);
+
+    qmatch!{test; 
+        true => { list.push(5) }, 
+        _{ list.push(0) }
+    }
 
     qfor!{item: list;
         *item = 0;
@@ -42,12 +68,12 @@ fn main() {
     wow(vec![1,2], false);
 
     let test2 = Test{
-        a: 1,
+        a: Example{o:1},
         b: false,
         c: test::A::Test
     };
 
-    qvar!(o[Test], b:test2.a);
+    qvar!(o[Test<Example>], b:test2.a);
 
     println!("Hello, world! {test2:?}, {test}");
 }

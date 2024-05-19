@@ -16,7 +16,15 @@
 /// ```
 #[macro_export]
 macro_rules! qmatch {
-    ( $expression:expr, $( $x:expr ),+ ) => {
+    ( $expression:expr; $( $x:expr => $block:block ),+, _$else:block ) => {
+        {
+            match $expression {
+                $( $x => $block, )*
+                _ => $else,
+            }
+        }
+    };
+    ( $expression:expr; $( $x:expr ),+ ) => {
         {
             match $expression {
                 $( $x => true, )*
@@ -111,14 +119,48 @@ macro_rules! qfn {
         $public fn $fn_name() 
     };
 }
+/// Generates an implement statement
+/// ## Params
+/// 
+/// (Optional param: *\[$trait:ty...\]*) you can write a trait to implement to the type
+/// 1. *$t:ty* is the type being implemented upon
+/// note: between 1. and 2. you must write *";"*
+/// 2. you can write anything here that you want to implement
+/// 
+/// # Example: 
+/// ```
+/// pub struct ExampleStruct {
+///     a: u32,
+///     b: u8,
+/// }
+/// 
+/// qimpl!{ExampleStruct; 
+///     fn new(a:u32, b:u32) -> Self {
+///         return Self{
+///             a,
+///             b,
+///         }
+///     }
+/// }
+/// 
+/// pub trait ExampleTrait {
+///     fn example();
+/// }
+/// 
+/// qimpl!{[ExampleTrait] ExampleStruct; 
+///     fn example() {
+///         println!("This is an example!");
+///     }
+/// }
+/// ```
 #[macro_export]
 macro_rules! qimpl {
-    ($t:ty; $($token:tt)*) => {
-        impl $t {$($token)*}
+    ($t:ident$(<$($wt:ident),*>)?; $($token:tt)*) => {
+        impl$(<$($wt),*>)? $t$(<$($wt),*>)? {$($token)*}
     };
 
-    ([$tr:ty] $t:ty; $($token:tt)*) => {
-        impl $tr for $t {$($token)*}
+    ([$tr:ident] $t:ident$(<$($wt:ident),*>)?; $($token:tt)*) => {
+        impl$(<$($wt),*>)? $tr for $t$(<$($wt),*> )? {$($token)*}
     };
 }
 #[macro_export]
@@ -152,4 +194,30 @@ macro_rules! qvar {
     ( $( $name:ident$([$a:ty])? $(:$b:expr)? ),* ) => {
         $( let $name$(:$a)?$(=$b)?;)*
     };
+}
+#[macro_export]
+macro_rules! qstruct {
+    ( $v:vis $n:ident$(<$( $wt:ident ),*>)?; $( $fv:vis $fn:ident:$ft:ty ),* ) => {
+        $v struct $n$(<$($wt)*>)?  {
+            $( $fv $fn:$ft ),*
+        }
+    };
+    //with where
+    ( $v:vis $n:ident$(<$( $wt:ident ),*>)?; $( $fv:vis $fn:ident:$ft:ty ),* $( |$( $wht:ident:$whty:tt),* )? ) => {
+        $v struct $n$(<$($wt)*>)? where $( $( $wht:$whty),* )? {
+            $( $fv $fn:$ft ),*
+        }
+    };
+    ( [ $($de:ty),+ ] $v:vis $n:ident$(<$($wt:ident),*>)?; $( $fv:vis $fn:ident:$ft:ty ),* ) => {
+        #[derive( $($de),*)] 
+        $v struct $n$(<$($wt)*>)? {
+            $( $fv $fn:$ft ),*
+        }
+    };
+    ( $v:vis $n:ident$(<$($wt:ident),*>)?; $( $fv:vis $fn:ident:$ft:ty ),* ) => {
+        $v struct $n$(<$($wt)*>)? {
+            $( $fv $fn:$ft ),*
+        }
+    };
+
 }

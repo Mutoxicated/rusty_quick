@@ -23,3 +23,11 @@ macro_rules! qcmp {
         }
     };
 }
+#[macro_export]
+macro_rules! qfield {
+    ($( $v:vis $n:ident:$t:ty ),+) => {
+        {
+            $( $v $n:$t )*
+        }
+    };
+}
