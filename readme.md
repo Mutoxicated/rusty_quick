@@ -25,3 +25,12 @@ qvar!(VariableName[Type], Value);
 //                |
 //                optional
 ```
+
+### Struct
+
+```rs
+qstruct!([DeriveMacro1, ...] /pub StructName; StructField1:Type1, ...)
+//       ^^^^^^^^^^^^^^^^^^^ ^^^^
+//       |                   |
+//       optional            optional
+```
